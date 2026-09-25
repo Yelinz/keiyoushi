@@ -313,12 +313,8 @@ abstract class Baozi :
     private fun filterImagesByMinId(imageUrls: List<String>, minId: Int): List<String> = imageUrls.filter { extractImageId(it) >= minId }
 
     override fun imageRequest(page: Page): Request {
-        val original = page.imageUrl!!
-            .replace(".baozicdn.com", ".baozimh.com")
-
-        return GET(original, headers).newBuilder()
+        return GET(page.imageUrl!!, headers).newBuilder()
             .tag(BaoziBannerInterceptor.ReaderPageImageTag::class.java, BaoziBannerInterceptor.ReaderPageImageTag)
-            .tag(RedirectDomainInterceptor.Tag::class.java, RedirectDomainInterceptor.Tag())
             .build()
     }
 
@@ -326,9 +322,7 @@ abstract class Baozi :
 
     override suspend fun getSearchMangaList(page: Int, query: String, filters: FilterList): MangasPage {
         val requestUrl = if (query.isNotEmpty()) {
-            val searchDomain = baseUrl.toHttpUrl().host.replace(".dinnerku.com", ".baozimh.com")
-            val searchPath = if (searchDomain.startsWith("app")) "/baozimhapp" else ""
-            "https://$searchDomain$searchPath".toHttpUrl().newBuilder()
+            siteBaseUrl.toHttpUrl().newBuilder()
                 .addEncodedPathSegment("search")
                 .addQueryParameter("q", query)
                 .toString()
